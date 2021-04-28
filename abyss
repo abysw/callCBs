@@ -1,0 +1,306 @@
+#!/usr/bin/env python3
+# -*- coding: UTF-8 -*-
+# Author: Yuan-SW-F, yuanswf@163.com
+# Created Time: 2020-11-09 13:21:30
+# Version : Ypip2.0, Python2
+# Example abyss.py command option
+
+from __future__ import print_function
+import sys, os, re
+
+import os.path as op
+import sys
+import logging
+import string
+
+import getopt
+def printusage():
+	print (
+	"""usage:  abyss command option
+	abyss fa2phy *.fa > *.phy               # format swich: MSA fasta to phylip
+	abyss phy2fa *.phy > *fa                # format swich: phylip to fasta   
+	abyss spgff *.gff                       # split total gff file to each choromosome
+	abyss cds4gff *.gff *.cds               # get cds from gff
+	abyss bed4gene gene.list *bed  1000000  # get 1Mb bed from gene list
+	abyss flank4gene gene.list *.bed upstream downstream # if you do not want include gene regin, just say not, like: abyss flank4gene gene.list *.bed upstream not
+	abyss linkfa sp.list *fa                # link msa fasta files to one phylip file
+	abyss maf2bed msa.maf                   # extract reference locs
+	
+	### read file from standin
+	abyss lst                               # cat file | abyss lst
+	abyss togff                             # cat *gff | abyss to gff [mRNA]
+	"""
+	)
+
+def main():
+	if len(sys.argv) < 2:
+		sys.exit(printusage())
+	if len(sys.argv) >= 2:
+		if sys.argv[1] == "maf2bed":
+			if len(sys.argv) == 2:
+				print ("abyss maf2bed msa.maf                   # extract reference locs")
+			else:
+				maf2bed(sys.argv[2:3])
+		if sys.argv[1] == "fa2phy":
+			if len(sys.argv) == 2:
+				print ("abyss fa2phy *.fa > *.phy")
+			else:
+				fa2phy(sys.argv)
+		elif sys.argv[1] == "phy2fa":
+			if len(sys.argv) == 2:
+				print ("abyss phy2fa *.phy > *.fa")
+			else:
+				phy2fa(sys.argv)
+		elif sys.argv[1] == "lst":
+			if len(sys.argv) > 2:
+				print ("please see lst.pl")
+			else:
+				os.system(""" perl -e 'while (<STDIN>){ if (/\n/){ $n++; chomp; push @i,$_; }else{ push @i,$_; } } if ($n<2){ $l=$i[0]; @i=split /\s+/,$l; $l=join "\n",@i; print "$l\n"; }else{ $l=join " ",@i; print "$l\n"; }' """)
+		elif sys.argv[1] == "togff":
+			type = 'mRNA'
+			if sys.argv == 3:
+				type = sys.argv[2]
+			os.system('''perl -ne '@l=split;if ($l[2] eq "''' + type + '''"){print "$l[0]\t";$l[8]=~/=([^\;\s]+)/;print "$1\t$l[3]\t$l[4]\n"} ' ''')
+		elif sys.argv[1] == "spgff":
+			if len(sys.argv) == 2:
+				print ("spgff *gff")
+			else:
+				spgff(sys.argv)
+		elif sys.argv[1] == "cds4gff":
+			if len(sys.argv) <= 3:
+				print ("abyss cds4gff *.gff *.cds")
+			else:
+				get_cds_from_gff(sys.argv)
+		elif sys.argv[1] == "bed4gene":
+			if len(sys.argv) <= 4:
+				print ("abyss bed4gene gene.list *bed   # get 1Mb gff from gene list")
+			else:
+				get_bed_from_gene_list(sys.argv)
+		elif sys.argv[1] == "flank4gene":
+			if len(sys.argv) <  4:
+				print ("abyss flank4gene gene.list *.bed upstream downstream")
+			else:
+				get_gene_flank(sys.argv[2:6])
+		elif sys.argv[1] == "linkfa":
+			if len(sys.argv) <  3:
+				print ("abyss linkfa sp.list *fa     # link msa fasta files to one phylip file")
+			else:
+				linkfa(sys.argv[2:4])
+
+def fa2phy(args):
+	"""
+	%prog fa2phy *.fa > *.phy
+	"""
+	fo = open(sys.argv[2])
+	count = 0
+	seq = ""
+	text = ""
+	for line in fo:
+		re_id = re.match('>(\S+)', line)
+		if re_id:
+			id = re_id.group(1)
+			count = count + 1
+			text += "\n" + id + '    '
+			seq = ""
+		else:
+			line = line.strip()
+			text += line
+			seq += line
+	print (str(count) + "    " + str(len(seq)) + text )
+
+def phy2fa(args):
+	"""
+	%prog phy2fa *.phy > *.fa
+	"""
+	fp = open(sys.argv[2])
+	fp.readline()
+	for line in fp:
+		list = line.split()
+		print (">" + list[0])
+		print (list[1])
+
+def spgff(args):
+	fp = open(sys.argv[2])
+	dict_chr = {}
+	for line in fp:
+		re_ot = re.match('(\S+)', line)
+		re_head = re.match('#', line)
+		if re_head:
+			continue
+		if re_ot:
+			if not re_ot.group(1) in dict_chr.keys():
+				to = open(re_ot.group(1) + ".gff", 'w+')
+				dict_chr[re_ot.group(1)] = 1
+			else:
+				to = open(re_ot.group(1) + ".gff", 'a')
+			to.writelines(line)
+def get_cds_from_gff(agrs):
+	fp = open(sys.argv[2])
+	re_file = re.match('(\S+).gff', sys.argv[2])
+	if re_file:
+		fo = open(re_file.group(1) + '.cds', 'w')
+	re_file = re.match('(\S+).bed', sys.argv[2])
+	if re_file:
+		fo = open(re_file.group(1) + '.cds', 'w')
+	dict_gene = {}
+	for line in fp:
+		list = line.split('\t')
+		re_gff = re.match('^\d+$', list[1])
+		if re_gff:
+			dict_gene[list[3]] = 1
+		else:
+			re_gene = re.search('ID=([^;\s]+)', line)
+			if re_gene:
+				dict_gene[re_gene.group(1)] = 1
+	fp.close()
+	fp = open(sys.argv[3])
+	for line in fp:
+		re_gene = re.search('\>(\S+)', line)
+		if re_gene:
+			id_gene = re_gene.group(1)
+			if id_gene in dict_gene.keys():
+				fo.writelines(line)
+		else:
+			if id_gene in dict_gene.keys():
+				fo.writelines(line)			
+
+### genelist, bed file, length[500000]
+def get_bed_from_gene_list(args):
+	fp = os.popen('grep -f ' + sys.argv[2] + ' ' + sys.argv[3])
+	scaf = {}
+	#re_file = re.match('(\S+).gff', sys.argv[2])
+	for line in fp:
+		line = line.strip()
+		line = line.split('\t')
+		if not line[0] in scaf.keys():
+			scaf[line[0]] = {}
+		scaf[line[0]]['gene'] = line[3]
+		scaf[line[0]]['start'] = int(line[1]) - int(sys.argv[4])
+		scaf[line[0]]['end'] = int(line[2]) + int(sys.argv[4])
+	fp.close()
+	fp = open(sys.argv[3])
+	for line in fp:
+		lines = line
+		line = line.strip()
+		line = line.split('\t')
+		if line[0] in scaf.keys():
+			ft = open(scaf[line[0]]['gene'] + '.bed', 'a')
+			if int(line[2]) > scaf[line[0]]['start'] and int(line[1]) < scaf[line[0]]['end']:
+				ft.write(lines)
+	
+def get_gene_flank(args):
+	gene_list, bed, upstream, downstream = args
+	fp = os.popen('grep -f ' + gene_list + ' ' + bed)
+	tmp1, tmp2 = upstream, downstream
+	for lines in fp:
+		line = lines.strip()
+		line = line.split('\t')
+		re_dig = re.match('^\d+$', line[1])
+		l_str = line[1]
+		l_end = line[2]
+		if re_dig: # bed file
+			if line[5] == "-":
+				upstream, downstream = tmp2, tmp1
+			#line[1] = line[1] + upstream
+			else:
+				upstream, downstream = tmp1, tmp2
+			if upstream == "not":
+				line[1] = l_end #line[2]
+			else:
+				line[1] = str(int(line[1]) - int(upstream))
+			if int(line[1]) < 0:
+				line[1] = '0'
+			if downstream == "not":
+				line[2] = l_str #line[1]
+			else:
+				line[2] = str(int(line[2]) + int(downstream))
+		else:      # gff file 
+			if line[5] == "-":
+				upstream, downstream = tmp2, tmp1
+			else:
+				upstream, downstream = tmp1, tmp2
+			if upstream == "not":
+				line[4] = line[3]
+			else:
+				line[3] = str(int(line[3]) - int(upstream))
+			if int(line[1]) < 0:
+				line[3] = '0'
+			if downstream == "not":
+				line[3] = line[4]
+			else:
+				line[4] = str(int(line[4]) + int(downstream))
+		print ('\t'.join(line))
+
+def linkfa(args):
+	sp_list, fa_files = args
+	fp = open(sp_list) #species list
+	species_s = []
+	for i in fp:
+		i = i.strip('\n')
+		list = re.split('\s+',i)
+		for j in list:
+			species_s.append(j)
+	muscle_file = fa_files # 'ls *le'
+	fp1 = os.popen(muscle_file)
+
+	count = 0
+	dict_s = {}
+	dict_sp = {}
+	for line in fp1:
+		if not os.path.getsize:
+				continue
+		line = line.strip('\n')
+		fpf = open(line)
+		seq = ''
+		id = ''
+		seq_l = 0
+		dict_s = {}
+		#print line
+		for linef in fpf:
+			id_re = re.match('>\S+\_(\w\w\w\w\w)',linef)
+			if id_re:
+				if len(seq) > 0:
+#					seq = re.sub(r'^ATG|TAA$|TAG$|TGA$','---',seq)
+					dict_s[id] = seq
+					seq_l = len(seq)
+				seq = ''
+				id = id_re.group(1)
+			else:
+				seq_s = linef.strip('\n')
+				seq += seq_s
+		if len(seq) > 0:
+#			seq = re.sub(r'^ATG|TAA$|TAG$|TGA$','---',seq)
+			dict_s[id] = seq
+			seq_l = len(seq)
+		seq = ''
+
+		for i in species_s:
+			re_sp = re.search('(\w\w)[a-z]*\_(\w\w\w)',i)
+			id = re_sp.group(1) + re_sp.group(2)
+			if not i in dict_sp.keys():
+				dict_sp[i] = ''
+			if id in dict_s.keys():
+				dict_sp[i] += dict_s[id]
+			else:
+				dict_sp[i] += '-'*seq_l
+	print ('{}\t{}'.format(len(species_s), len(dict_sp[species_s[0]])))
+	for i in species_s:
+		print (i + '\t' + dict_sp[i])
+def maf2bed(args):
+	msa = args[0]
+	fi = open(msa)
+	check = 0
+	for line in fi:
+		re_head = re.match(r'a', line)
+		if check == 1:
+			line = line.strip()
+			line = line.split()
+			#print (line)
+			print (line[1] + '\t' + line[2] + "\t" + str(int(line[2]) + int(line[3])))
+			check = 0
+		if re_head:
+			check = 1
+
+
+if __name__ == "__main__":
+	main()
