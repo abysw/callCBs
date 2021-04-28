@@ -16,7 +16,7 @@ source ~/.bashrc
 # 	files: NFC.lst, NFL.lst, NFN.lst
 
 # import in house script
-export PATH=/vol3/asbc/CHENGSHIFENG_GROUP/fuyuan/02.Nfix/00.81species_CNE/35.CNB/callCBs/callCBs:$PATH
+export PATH=script_path/callCBs:$PATH
 # set chromosome
 chr=MtrunA17MT_Metru
 
