@@ -17,7 +17,7 @@ $ git clone https://github.com/Yuan-SW-F/callCBs.git
 >> Write all tools into environment variables
 
 ## 2. prepare files
-$ sh lastz-axt.sh genomeA.fasta  genomeA.fasta
+$ sh lastz-axt.sh genomeA.fasta  genomeB.fasta
 
 $ roast "the phylogenetic tree" *sing.maf roast.maf
 
