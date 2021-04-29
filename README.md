@@ -16,8 +16,10 @@ $ git clone https://github.com/Yuan-SW-F/callCBs.git
 
 ## 2. prepare files
 $ sh lastz-axt.sh genomeA.fasta  genomeA.fasta
+
 $ roast "the phylogenetic tree" *sing.maf roast.maf
 
 ## 3. callCBs (main pipeline)
 cd test
+
 sh ../CallCBs.sh
