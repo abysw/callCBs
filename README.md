@@ -25,3 +25,13 @@ $ roast "the phylogenetic tree" *sing.maf roast.maf
 cd test
 
 sh ../CallCBs.sh
+
+## Files in this pipeline
+abyss # script for change file format
+call_CBs.py # core python3 script for call Conserved Blocks
+CallCBs.sh # main executable shell script for call Conserved Blocks
+lastz # software for pairwise sequence alignment, could be download from github
+lastz-axt.sh # main executable shell script for pairwise sequence alignment
+multiz-tba.012109/ # executable script of multiz-tba.012109
+README.md # This file
+test/ # test data and script
