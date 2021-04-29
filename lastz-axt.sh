@@ -26,26 +26,16 @@ lastz $1[multiple] $2[multiple] --ambiguous=iupac --chain --notransition H=2000 
 # lastz $1[multiple] $2[multiple] H=2000 X=9400 L=3000 K=2200 --format=axt > $RM-$QM.axt # xhj
 # lastz $1[multiple] $2[multiple] --gapped --ambiguous=n --step=10 --strand=both --masking=10 --maxwordcount=500 --identity=70..100 --format=axt > $RM-$QM.axt #gold fish
 
-### axt Chain Net 
+### Chain Net 
 axtSort $RM-$QM.axt $RM-$QM.sorted.axt
-# axtBest -minOutSize=200 -minScore=10000 $RM-$QM.sorted.axt all $RM-$QM.sorted.best.axt
-ln -s $RM-$QM.sorted.axt $RM-$QM.sorted.best.axt
-axtChain -linearGap=/public/agis/chengshifeng_group/fuyuan/pip-fuyuan/GAP_matrix_plant.dms $RM-$QM.sorted.best.axt $RN.2bit $QN.2bit $RM-$QM.sorted.best.filtered.chain
-chainPreNet $RM-$QM.sorted.best.filtered.chain $RN.sizes $QN.sizes $RM-$QM.sorted.best.filtered.pre.chain
-chainNet $RM-$QM.sorted.best.filtered.pre.chain -minSpace=1 $RN.sizes $QN.sizes stdout /dev/null | netSyntenic stdin $RM-$QM.sorted.best.filtered.pre.noClass.net
+axtChain -linearGap=/public/agis/chengshifeng_group/fuyuan/pip-fuyuan/GAP_matrix_plant.dms $RM-$QM.sorted.axt $RN.2bit $QN.2bit $RM-$QM.sorted.filtered.chain
+chainPreNet $RM-$QM.sorted.filtered.chain $RN.sizes $QN.sizes $RM-$QM.sorted.filtered.pre.chain
+chainNet $RM-$QM.sorted.filtered.pre.chain -minSpace=1 $RN.sizes $QN.sizes stdout /dev/null | netSyntenic stdin $RM-$QM.sorted.filtered.pre.noClass.net
 
-### trans
-cp $RM-$QM.sorted.best.filtered.pre.noClass.net $RM-$QM.net
-netToAxt $RM-$QM.net $RM-$QM.sorted.best.filtered.pre.chain $RN.2bit $QN.2bit stdout | axtSort stdin $RM-$QM.net.sorted.axt
+### trans format
+cp $RM-$QM.sorted.filtered.pre.noClass.net $RM-$QM.net
+netToAxt $RM-$QM.net $RM-$QM.sorted.filtered.pre.chain $RN.2bit $QN.2bit stdout | axtSort stdin $RM-$QM.net.sorted.axt
 axtToMaf $RM-$QM.net.sorted.axt $RN.sizes $QN.sizes $RM-$QM.net.sorted.axt.maf
-maf-convert sam $RM-$QM.net.sorted.axt.maf > $RM-$QM.net.sorted.axt.maf.sam
-# samtools view -bt $1.fai $RM-$QM.net.sorted.axt.maf.sam > $RM-$QM.net.sorted.axt.maf.bam
-# samtools sort $RM-$QM.net.sorted.axt.maf.bam > $RM-$QM.net.sorted.axt.maf.sorted.bam
-# samtools index $RM-$QM.net.sorted.axt.maf.sorted.bam
-# bamToBed -i $RM-$QM.net.sorted.axt.maf.sorted.bam > $RM-$QM.net.sorted.axt.maf.sorted.bam.bed
-# sort -k1,1 -k2,2n  $RM-$QM.net.sorted.axt.maf.sorted.bam.bed > $RM-$QM.net.sorted.axt.maf.sorted.bam.sorted.bed
-# bedtools merge -i $RM-$QM.net.sorted.axt.maf.sorted.bam.sorted.bed > $RM-$QM.net.sorted.axt.maf.sorted.bam.sorted.merged.bed
-# mv $RM-$QM.net.sorted.axt.maf.sorted.bam.sorted.merged.bed $RM-$QM.bed
 
 less $RM-$QM.net.sorted.axt.maf | perl -ne 'if (/^a/){print \$_;\$i=<STDIN>;\$i=~s/^s\\ /s\\ $RM\./;\$j=<STDIN>;\$j=~s/^s\\ /s\\ $QM\./;print \$i.\$j;}else{print \$_;}' > $RM-$QM.maf
 maf_sort $RM-$QM.maf $RM > $RM-$QM.orig.maf
@@ -55,4 +45,6 @@ if [ ! -f "../maf" ];then
 fi
 cp $RM-$QM.sing.maf ../maf/$RM.$QM.sing.maf
 rm *sorted* *2bit 
+echo Finished!!!
+echo The result is in $PWD/../maf/$RM.$QM.sing.maf
 " > $RM-$QM/$RM-$QM-blastz.sh
