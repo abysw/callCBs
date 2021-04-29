@@ -14,6 +14,8 @@ $ conda install bedtools
 ### obtain this pipeline
 $ git clone https://github.com/Yuan-SW-F/callCBs.git
 
+>> Write software into environment variables
+
 ## 2. prepare files
 $ sh lastz-axt.sh genomeA.fasta  genomeA.fasta
 
