@@ -25,7 +25,7 @@ $ roast "the phylogenetic tree" *sing.maf roast.maf
 ### For quick start:
 cd test
 
-sh ../CallCBs.sh
+sh test.sh
 
 ## Files in this pipeline
 abyss                   # script for change file format
