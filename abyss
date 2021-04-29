@@ -2,7 +2,7 @@
 # -*- coding: UTF-8 -*-
 # Author: Yuan-SW-F, yuanswf@163.com
 # Created Time: 2020-11-09 13:21:30
-# Version : Ypip2.0, Python2
+# Version : Ypip2.0, Python3
 # Example abyss.py command option
 
 from __future__ import print_function
