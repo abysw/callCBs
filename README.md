@@ -6,7 +6,7 @@
 $ conda install bedtools
 
 #### install lastz
-> http://www.bx.psu.edu/~rsharris/lastz/README.lastz-1.04.03.html#install
+> https://github.com/lastz/lastz
 
 #### install multiz-tba.012109
 > https://www.bx.psu.edu/miller_lab/dist/multiz-tba.012109.tar.gz
@@ -43,3 +43,6 @@ multiz-tba.012109/      # executable script of multiz-tba.012109
 README.md               # This file
 
 test/                   # test data and script
+## Citing:
+web: https://github.com/Yuan-SW-F/callCBs
+article: 
