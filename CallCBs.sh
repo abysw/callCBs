@@ -54,9 +54,9 @@ rm $chr.rawCNE.*
 mkdir clade
 mkdir clade_block
 cd clade
-for c in `ls ../.. | grep -P "\.lst" | sed s/.lst//` ;do
-	L=`cat ../../$c.lst | abyss lst`
-	C=`cat ../../$c.lst | wc -l | perl -ne 'print int(0.9*$1 + 0.999) if /(\d+)/'`
+for c in `ls ./.. | grep -P "\.lst" | sed s/.lst//` ;do
+	L=`cat ./../$c.lst | abyss lst`
+	C=`cat ./../$c.lst | wc -l | perl -ne 'print int(0.9*$1 + 0.999) if /(\d+)/'`
 	mkdir $c
 	cd $c
 	maf_order ../../$chr.maf $L > $chr.maf.order
