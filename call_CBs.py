@@ -5,7 +5,7 @@
 # Version : Ypip2.0, Python3
 # github: https://github.com/Yuan-SW-F/callCBs
 # Example call_CBs.py file.maf
-# Filter out sequences with nt < 5bp and query_len/reference_len < 0.5, Filter out blocks with fewer than 1 rows.
+# Filter out sequences with nt < 5bp and query_len/reference_len < 0.5, Filter out blocks with fewer than 2 rows.
 import sys, os, re
 
 fo_file = sys.argv[1]
