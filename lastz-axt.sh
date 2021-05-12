@@ -2,7 +2,7 @@
 # File Name: lastz-axt.sh
 # Author  : Yuan-SW-F, yuanswf@163.com
 # Created Time: 2019-04-15 16:30:26
-source /public/home/fuyuan/.bashrc
+source ~/.bashrc
 ### input ref query
 RN=`echo $1|perl -ne '/((\w+)[^\/]+)$/;print $1'`;
 RM=`echo $1|perl -ne '/((\w+)[^\/]+)$/;print $2'`;
@@ -10,7 +10,7 @@ QN=`echo $2|perl -ne '/((\w+)[^\/]+)$/;print $1'`;
 QM=`echo $2|perl -ne '/((\w+)[^\/]+)$/;print $2'`;
 
 mkdir $RM-$QM;
-echo "source /public/home/fuyuan/.bashrc
+echo "source ~/.bashrc
 ### build
 if [ ! -e $1.fai ];then
 	samtools faidx $1
